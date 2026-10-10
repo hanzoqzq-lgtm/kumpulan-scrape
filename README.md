@@ -38,7 +38,7 @@
 ## 📈 Stats
 
 <div align="center">
-<img src="https://www.pasteboard.co/5PUtbUVAsBtb.jpg" width="100%" />
+<img src="assets/stats.jpeg" width="100%" />
 
 
 
