@@ -34,6 +34,7 @@
 | 🧩 File | 📝 Fungsi |
 |:--------|:----------|
 | `removeBackground.js` | Hapus background gambar |
+| `tempmail.js` | FUNGSI |
 
 ## 🖼️ Galeri
 
