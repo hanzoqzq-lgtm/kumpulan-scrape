@@ -34,6 +34,7 @@
 | 🧩 File | 📝 Fungsi |
 |:--------|:----------|
 | `removeBackground.js` | Hapus background gambar |
+| `tempmail.js` | Generate akun sementara |
 | `tempmail.js` | FUNGSI |
 
 ## 🖼️ Galeri
