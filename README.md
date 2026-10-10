@@ -38,11 +38,9 @@
 ## 📈 Stats
 
 <div align="center">
+<img src="https://www.pasteboard.co/5PUtbUVAsBtb.jpg" width="100%" />
 
-<img src="https://github-readme-stats.vercel.app/api?username=hanzoqzq-lgtm&show_icons=true&theme=radical&hide_border=true&count_private=true" height="160" />
-<img src="https://github-readme-stats.vercel.app/api/top-langs/?username=hanzoqzq-lgtm&layout=compact&theme=radical&hide_border=true" height="160" />
 
-<img src="https://github-readme-activity-graph.vercel.app/graph?username=hanzoqzq-lgtm&theme=react-dark&hide_border=true&area=true" width="100%" />
 
 </div>
 
