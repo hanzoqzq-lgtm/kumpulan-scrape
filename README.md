@@ -2,7 +2,7 @@
 
 <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=12,14,18,20,24&height=260&section=header&text=KUMPULAN%20SCRAPE&fontSize=60&fontColor=ffffff&animation=fadeIn&fontAlignY=36&desc=%E2%9A%A1%20Fast%20%E2%80%A2%20Simple%20%E2%80%A2%20Powerful%20%E2%9A%A1&descAlignY=58&descSize=20" width="100%"/>
 
-<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=22&duration=3000&pause=800&color=00FF9C&background=00000000&center=true&vCenter=true&width=600&lines=%3E+Initializing+scraper...;%3E+Bypass+%7C+Extract+%7C+Done;%3E+Made+with+Hanzo" />
+<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=22&duration=3000&pause=800&color=00FF9C&background=00000000&center=true&vCenter=true&width=600&lines=%3E+Halo;%3E+Bypass+%7C+Extract+%7C+Done;%3E+Made+with+Hanzo" />
 
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
 
