@@ -35,10 +35,10 @@
 |:--------|:----------|
 | `removeBackground.js` | Hapus background gambar |
 
-## 📈 Stats
+## 🖼️ Galeri
 
 <div align="center">
-<img src="assets/stats.jpeg" width="100%" />
+<img src="assets/galeri.jpeg" width="100%" />
 
 
 
