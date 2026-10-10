@@ -27,7 +27,7 @@
 
 ## 🔥 Tentang
 
-> Kumpulan kode scrape yang gw bikin langsung dari HP lewat Termux. Ringan, simpel, siap pakai.
+> Berisi berbagai kode hasil scrape siap pakai, yang bisa lu pilih sesuai kebutuhan project lu.
 
 ## 📂 Daftar Tools
 
