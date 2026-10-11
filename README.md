@@ -35,6 +35,8 @@
 |:--------|:----------|
 | `removeBackground.js` | Hapus background gambar |
 | `tempmail.js` | Generate akun Gmail sementara |
+| `spotidown.js` | Download lagu dari Spotify |
+| `ff_id_checker.js` | Cek informasi player |
 
 ## 🖼️ Galeri
 
