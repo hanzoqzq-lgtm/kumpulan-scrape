@@ -37,7 +37,7 @@
 | `tempmail.js` | Generate akun Gmail sementara |
 | `spotidown.js` | Download lagu dari Spotify |
 | `ff_id_checker.js` | Cek informasi player |
-| `ehentai-node.mjs` | Search dan ambil gambar dari E-Hentai |
+| `ehentai.js` | Search dan ambil gambar dari E-Hentai |
 
 ## 🖼️ Galeri
 

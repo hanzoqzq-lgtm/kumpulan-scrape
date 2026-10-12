@@ -1,20 +1,15 @@
-#!/usr/bin/env node
 /**
- * E-Hentai Search & Image Downloader (Node.js, standalone, ESM)
- * Scraper asli: Hanzo (kumpulan-scrape) — dipakai utuh, ditambah CLI.
- * Butuh Node.js 18+ (fetch bawaan). Tanpa dependensi npm.
- *
- * Pakai:
- *   node ehentai-node.mjs "<kata kunci>"                  -> daftar galeri
- *   node ehentai-node.mjs "<kata kunci>" --pick=1          -> download halaman galeri hasil ke-1
- *   node ehentai-node.mjs <url galeri> --pages=5           -> download 5 halaman pertama
- * Opsi: --limit=10 (jumlah hasil)  --pages=5 (jumlah halaman)  --out=./ehentai (folder simpan)
- *
- * Galeri bertag lolicon/shotacon/toddlercon otomatis disaring & ditolak.
+ * Scraper: E-Hentai Search & Image Scraper
+ * Source: https://e-hentai.org/
+ * Author: Hanzo
+ * Note: Jika ada error fix sendiri
+ * Kode: https://github.com/hanzoqzq-lgtm/kumpulan-scrape
  */
 
-import fs from 'node:fs';
-import path from 'node:path';
+const fs = require("fs");
+const path = require("path");
+
+process.noDeprecation = true;
 
 const DEFAULT_UA =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36";
@@ -730,90 +725,141 @@ async function downloadPageImage(viewerUrlOrPageObj, outputPath = null) {
 }
 
 // ============================================================================
-// CLI
+// CLI Runner
 // ============================================================================
-const TAG_DILARANG = new Set(['lolicon', 'shotacon', 'toddlercon', 'loli', 'shota']);
-const REGEX_JUDUL_DILARANG = /\b(loli(con)?|shota(con)?|toddler(con)?)\b/i;
+if (require.main === module) {
+  (async () => {
+    const args = process.argv.slice(2);
+    const target =
+      args.find((a) => !a.startsWith("--")) || "naruto";
 
-function dilarang(item) {
-  const tagList = (item.tags || []).map((t) => String(t).split(':').pop().toLowerCase().trim());
-  if (tagList.some((t) => TAG_DILARANG.has(t))) return true;
-  return REGEX_JUDUL_DILARANG.test(`${item.title || ''} ${item.titleJpn || ''}`);
-}
+    const getFlag = (name, defVal) => {
+      const idx = args.findIndex(
+        (a) => a === `--${name}` || a.startsWith(`--${name}=`)
+      );
+      if (idx === -1) return defVal;
+      if (args[idx].includes("="))
+        return args[idx].split("=").slice(1).join("=");
+      return args[idx + 1] && !args[idx + 1].startsWith("--")
+        ? args[idx + 1]
+        : true;
+    };
 
-const argv = process.argv.slice(2);
-const flag = (nama, awal) => {
-  const hit = argv.find((a) => a.startsWith(`--${nama}=`));
-  return hit ? hit.split('=').slice(1).join('=') : awal;
-};
-const target = argv.find((a) => !a.startsWith('--'));
+    const limit = Number(getFlag("limit", 5));
+    const maxImages = Number(getFlag("images", 3));
+    const outFile = getFlag("out", null);
 
-function bantuan() {
-  console.log(`E-Hentai Node.js
-  node ehentai-node.mjs "<kata kunci>"            daftar galeri
-  node ehentai-node.mjs "<kata kunci>" --pick=1    download galeri hasil ke-1
-  node ehentai-node.mjs <url galeri> --pages=5     download 5 halaman pertama
-Opsi: --limit=10  --pages=5  --out=./ehentai`);
-}
+    console.log("====================================================");
+    console.log("  E-Hentai Search & Image Scraper");
+    console.log("  Source: https://e-hentai.org/");
+    console.log("====================================================");
 
-async function unduhGaleri(urlGaleri, jumlah, folderOut) {
-  const detail = await getGalleryDetail(urlGaleri, { resolveImages: true, maxImages: jumlah });
-  if (dilarang(detail)) throw new Error('Galeri ditolak (konten melibatkan karakter di bawah umur).');
-  if (!detail.images?.length) throw new Error('Tidak ada gambar yang bisa diambil.');
-
-  console.log(`\n[+] ${detail.title}`);
-  console.log(`    ${detail.category} • ${detail.filecount} hal • ★${detail.rating}`);
-  console.log(`    Tag: ${(detail.tags || []).slice(0, 12).join(', ') || '-'}`);
-
-  const dir = path.resolve(folderOut, String(detail.gid));
-  fs.mkdirSync(dir, { recursive: true });
-
-  let ok = 0;
-  for (const img of detail.images) {
     try {
-      const ext = (img.filename && path.extname(img.filename)) || '.jpg';
-      const out = path.join(dir, `${String(img.page).padStart(3, '0')}${ext}`);
-      const dl = await downloadPageImage(img, out);
-      console.log(`    hal ${img.page}: ${dl.savedTo} (${dl.bytes} bytes)`);
-      ok++;
-    } catch (e) {
-      console.error(`    hal ${img.page}: GAGAL — ${e.message}`);
+      // Mode 1: Viewer Page URL (`/s/<imgkey>/<gid>-<page>`)
+      if (/\/s\/[a-f0-9]{10}\/\d+-\d+/i.test(target)) {
+        console.log(`[*] Mode   : Ambil Gambar dari Viewer URL`);
+        console.log(`[*] Target : ${target}`);
+        const imgInfo = await getPageImage(target);
+        console.log("\n[+] Detail Gambar Halaman:");
+        console.log(JSON.stringify(imgInfo, null, 2));
+
+        if (outFile) {
+          const dl = await downloadPageImage(imgInfo, outFile);
+          console.log(
+            `\n[+] Gambar berhasil diunduh ke: ${dl.savedTo} (${dl.bytes} bytes)`
+          );
+        }
+        return;
+      }
+
+      // Mode 2: Gallery URL (`/g/<gid>/<token>/`)
+      if (/\/g\/\d+\/[a-f0-9]{10}/i.test(target)) {
+        console.log(`[*] Mode       : Detail Galeri & Ekstrak Gambar`);
+        console.log(`[*] Target     : ${target}`);
+        console.log(`[*] Max Images : ${maxImages}`);
+        const detail = await getGalleryDetail(target, {
+          resolveImages: true,
+          maxImages,
+        });
+        console.log("\n[+] Detail Galeri & Link Gambar:");
+        console.log(
+          JSON.stringify(
+            {
+              gid: detail.gid,
+              token: detail.token,
+              title: detail.title,
+              category: detail.category,
+              uploader: detail.uploader,
+              filecount: detail.filecount,
+              rating: detail.rating,
+              thumb: detail.thumb,
+              tags: detail.tags.slice(0, 15),
+              images: detail.images,
+            },
+            null,
+            2
+          )
+        );
+
+        if (outFile && detail.images.length > 0) {
+          const dl = await downloadPageImage(detail.images[0], outFile);
+          console.log(
+            `\n[+] Gambar halaman 1 diunduh ke: ${dl.savedTo} (${dl.bytes} bytes)`
+          );
+        }
+        return;
+      }
+
+      // Mode 3: Search Query + Ambil Gambar dari Hasil Pertama
+      console.log(`[*] Mode       : Search Galeri & Ambil Gambar`);
+      console.log(`[*] Query      : ${target}`);
+      console.log(`[*] Limit      : ${limit}`);
+      const searchRes = await searchEhentai(target, { limit });
+      console.log(
+        `\n[+] Ditemukan ${searchRes.totalText || searchRes.count + " hasil"} (menampilkan ${
+          searchRes.count
+        } galeri):`
+      );
+      for (const [idx, item] of searchRes.results.entries()) {
+        console.log(
+          `  ${idx + 1}. [${item.category}] ${item.title} (${item.filecount} hal, ★${item.rating})\n     URL   : ${item.url}\n     Thumb : ${item.thumb}`
+        );
+      }
+
+      if (searchRes.results.length > 0 && maxImages > 0) {
+        const first = searchRes.results[0];
+        console.log(
+          `\n[*] Mengambil ${maxImages} gambar pertama dari galeri #1 (${first.url})...`
+        );
+        const detail = await getGalleryDetail(first.url, {
+          resolveImages: true,
+          maxImages,
+        });
+        console.log("\n[+] Daftar Gambar Resolusi Penuh (H@H CDN):");
+        console.log(JSON.stringify(detail.images, null, 2));
+
+        if (outFile && detail.images.length > 0) {
+          const dl = await downloadPageImage(detail.images[0], outFile);
+          console.log(
+            `\n[+] Gambar halaman 1 berhasil disimpan ke: ${dl.savedTo} (${dl.bytes} bytes)`
+          );
+        }
+      }
+    } catch (err) {
+      console.error("\n[!] Error:", err.message);
+      process.exit(1);
     }
-  }
-  console.log(`\n[+] ${ok}/${detail.images.length} halaman tersimpan di ${dir}`);
+  })();
 }
 
-(async () => {
-  if (!target || argv.includes('--help') || argv.includes('-h')) return bantuan();
-
-  const limit = Math.min(25, Math.max(1, Number(flag('limit', 10))));
-  const pages = Math.min(50, Math.max(1, Number(flag('pages', 5))));
-  const folderOut = flag('out', './ehentai');
-  const pick = flag('pick', null);
-
-  try {
-    if (/\/g\/\d+\/[a-f0-9]{10}/i.test(target)) {
-      console.log(`[*] Mode galeri: ${target} (${pages} halaman)`);
-      return await unduhGaleri(target, pages, folderOut);
-    }
-
-    console.log(`[*] Mencari: ${target}`);
-    const hasil = await searchEhentai(target, { limit: limit + 10 });
-    const aman = hasil.results.filter((r) => !r.error && !dilarang(r)).slice(0, limit);
-    if (!aman.length) return console.log('[!] Tidak ada hasil.');
-
-    console.log(`\n[+] ${hasil.totalText || `${aman.length} hasil`} (menampilkan ${aman.length}):`);
-    aman.forEach((r, i) => {
-      console.log(`  ${i + 1}. [${r.category}] ${r.title} (${r.filecount} hal, ★${r.rating})\n     ${r.url}`);
-    });
-
-    if (pick) {
-      const item = aman[Number(pick) - 1];
-      if (!item) throw new Error(`--pick=${pick} di luar daftar (1-${aman.length}).`);
-      await unduhGaleri(item.url, pages, folderOut);
-    }
-  } catch (e) {
-    console.error('\n[!] Error:', e.message);
-    process.exit(1);
-  }
-})();
+module.exports = {
+  searchEhentai,
+  getGalleryDetail,
+  getPageImage,
+  downloadPageImage,
+  getGalleryMetadata,
+  getGalleryTokens,
+  parseGalleryUrl,
+  parseViewerUrl,
+  CATEGORY_BITMASK,
+};
